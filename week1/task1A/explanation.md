@@ -78,6 +78,62 @@ From this i can infer that more the parent education better score of the childer
 
 
 ## Task 1.2 – Visualization & Insights
+After plotting Insights:
+- More student in the cluster bettween 60 to 80.Total Score looks more symmtrical while maths score looks slightly skewed.3 of them have clustered around 60 to 80 while few in exterme ends.
+- Group E consistenly overperforms over other groups.Similar can be said about standard vs free lunch but the difference is that huge.Females outperform males on reading and writing but the gap narrows on math.
+- Using the correlation heatmap Reading and writing are very strongly correlated at 0.95 while 0.80 with math instead of writing.so maybe reading and writing could almost be compressed into one feature
+
+
+## Task 1.3 – Feature Engineering & Preprocessing
+```
+total_score = math + reading + writing
+``` 
+This make sense for this model as we dont have study time or other data.combine 3 scores give the model the students overall performance.rather than trying to look at 3 columns worth of data this ones combines everything into one.
+
+### Encode Categorical Columns
+```
+df['gender'] = df['gender'].map({'female': 1, 'male': 0})
+df['lunch'] = df['lunch'].map({'standard': 1, 'free/reduced': 0})
+df['test_preparation_course'] = df['test_preparation_course'].map({'completed': 1, 'none': 0})
+```
+we use binary encoding 0/1 for when column has 2 values.we do this as Ml models are math and cant handle categories,so have to convert to numbers.
+```
+df = pd.get_dummies(df, columns=['race/ethnicity', 'parental_level_of_education'])
+```
+
+we use one-hot encoding when columns have more than 2 values.this treats all the different category same no bias.Each row gets a 1 in its group's column, 0 everywhere else.
+for example 
+BEFORE:
+| race/ethnicity |
+|----------------|
+| group C        |
+| group A        |
+| group E        |
+| group B        |
+| group D        |
+
+AFTER:
+| group_A | group_B | group_C | group_D | group_E |
+|---------|---------|---------|---------|---------|
+|    0    |    0    |    1    |    0    |    0    |
+|    1    |    0    |    0    |    0    |    0    |
+|    0    |    0    |    0    |    0    |    1    |
+
+One column becomes five. Each row has exactly one 1 and four 0s.They're assigned based on which category the row actually belongs to.
+
+### Scale Numeric Features
+ML model require feature scaling to ensure that all features contribute equally to the model's performance, preventing features with larger numerical ranges from dominating the learning process.
+For example,iq is between 100 to 130 and total score is between 0 to 600 then total score dominates more when not used feature scaling.
+-  StandardScaler: convert the values of column that has mean 0 and standard deviation of 1.
+   ```
+   scaler = StandardScaler()
+   df[['math_score', 'reading_score', 'writing_score']] = scaler.fit_transform(df[['math_score', 'reading_score', 'writing_score']])
+   ```
+-  MinMaxScaler - keeps everything between 0 and 1.
+    ```
+    scaler = MinMaxScaler()
+    df[['math_score', 'reading_score', 'writing_score']] = scaler.fit_transform(df[['math_score', 'reading_score', 'writing_score']])
+    ```
 
 
 
